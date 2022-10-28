@@ -12,6 +12,10 @@ class GenerateHtmlService():
 
     __link_text_regex = re.compile(r'\[([^\]]*)\]')
     __href_text_regex = re.compile(r'\(([^)]*)\)')
+    __Markdown: MarkdownTagService
+
+    def __init__(self) -> None:
+        self.__Markdown = MarkdownTagService()
 
     def create_header(self, size: int, content: str) -> str:
         """Converts the Content into Header Tags based on the size"""
@@ -36,6 +40,24 @@ class GenerateHtmlService():
 
         return f'<a href=\'{href_text}\'>{link_text}</a>'
 
+    def replace_anchor_tag_in_markdown_text( self, markdown_line) -> str:
+        """Method to replace markdown text with html anchor tags"""
+
+        link_search_matches = self.__Markdown.link_tag_regex.finditer(markdown_line)
+        altered_html: str = markdown_line
+        if link_search_matches is not None:
+
+            # replace each matched instance with the anchor tag
+            for link_search_match in link_search_matches:
+
+                anchor_tag = self.create_anchor_tag(altered_html)
+                link_search_match_text = link_search_match.group(0)
+
+                altered_html = altered_html.replace( link_search_match_text, \
+                                    anchor_tag, 1)
+
+        return altered_html
+
 if __name__ == '__main__':
 
     file_name : str = sys.argv[1]
@@ -44,7 +66,7 @@ if __name__ == '__main__':
 
     with open(file_name, encoding="utf-8") as file:
 
-        unformatted_line: str = ''
+        unformatted_line_block: str = ''
 
         for line in file:
 
@@ -53,9 +75,9 @@ if __name__ == '__main__':
 
             # if the line is a newline and no unformatted_line_text has been recorded
             # print out the recorded unformatted_line_text and empty it out
-            if line == '\n' and unformatted_line != '':
-                print(GenerateHtml.create_unformatted_text(unformatted_line.strip()))
-                unformatted_line = ''
+            if line == '\n' and unformatted_line_block != '':
+                print(GenerateHtml.create_unformatted_text(unformatted_line_block.strip()))
+                unformatted_line_block = ''
 
             if header_search is not None:
                 #Create HTML Header tag based on size of #, strip off whitespace
@@ -65,41 +87,17 @@ if __name__ == '__main__':
                 # beginning of the line. Header text should all exist on
                 # Same line for compatibility Reference: https://www.markdownguide.org/basic-syntax/
                 formatted_line: str = Markdown.header_tag_regex.sub('', line.strip())
-
-                link_search_matches = Markdown.link_tag_regex.finditer(formatted_line)
-                
-                if link_search_matches is not None:
-
-                    # replace each matched instance with the anchor tag
-                    for link_search_match in link_search_matches:
-
-                        anchor_tag = GenerateHtml.create_anchor_tag(formatted_line)
-                        link_search_match_text = link_search_match.group(0)
-
-                        formatted_line = formatted_line.replace( link_search_match_text, \
-                                            anchor_tag, 1)
+                formatted_line = GenerateHtml.replace_anchor_tag_in_markdown_text(formatted_line)
 
                 print(GenerateHtml.create_header(header_size, formatted_line))
             elif line != '\n':
                 #add lines together that are not newlines to put into <p> tags
-                formatted_line: str = line
-                link_search_matches = Markdown.link_tag_regex.finditer(formatted_line)
-
-                if link_search_matches is not None:
-
-                    # replace each matched instance with the anchor tag
-                    for link_search_match in link_search_matches:
-
-                        anchor_tag = GenerateHtml.create_anchor_tag(formatted_line)
-                        link_search_match_text = link_search_match.group(0)
-
-                        formatted_line = formatted_line.replace( link_search_match_text, \
-                                            anchor_tag, 1)
-
-                unformatted_line += formatted_line
+                formatted_line: str = GenerateHtml.replace_anchor_tag_in_markdown_text(line)
+                
+                unformatted_line_block += formatted_line
             else:
                 print(line.strip())
 
         #print out any remaining lines that might have been recorded
-        if unformatted_line != '':
-            print(GenerateHtml.create_unformatted_text(unformatted_line), end='')
+        if unformatted_line_block != '':
+            print(GenerateHtml.create_unformatted_text(unformatted_line_block), end='')
