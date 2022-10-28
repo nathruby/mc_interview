@@ -1,12 +1,5 @@
-# Header one
+# Sample Document
 
-Hello there
+Hello!
 
-How are you?
-What's going on?
-
-## Another Header
-
-This is a paragraph [with an inline link](http://google.com). Neat, eh?
-
-## This is a header [with a link](http://yahoo.com)[with a link](http://yahoo.com)[with a link](http://yahoo.com)
+This is sample markdown for the [Mailchimp](https://www.mailchimp.com) homework assignment.
