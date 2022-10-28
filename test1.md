@@ -9,4 +9,4 @@ What's going on?
 
 This is a paragraph [with an inline link](http://google.com). Neat, eh?
 
-## This is a header [with a link](http://yahoo.com)
+## This is a header [with a link](http://yahoo.com)[with a link](http://yahoo.com)[with a link](http://yahoo.com)
